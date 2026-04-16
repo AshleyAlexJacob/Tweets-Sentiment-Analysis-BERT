@@ -1,0 +1,24 @@
+project:
+  name: "Tweet Sentiment Analysis BERT (DEV)"
+  version: "0.1.0"
+
+data:
+  raw_path: "dataset/raw"
+  processed_path: "dataset/processed"
+  test_size: 0.2
+  random_state: 42
+  max_length: 128
+  batch_size: 16
+
+model:
+  # Tiny BERT for faster local development and smoke tests.
+  name: "prajjwal1/bert-tiny"
+  num_labels: 3
+  learning_rate: 2e-5
+  epochs: 2
+  checkpoint_path: "artifacts/checkpoints-dev"
+
+api:
+  host: "0.0.0.0"
+  port: 8000
+  version: "v1"
