@@ -1,10 +1,29 @@
-from __future__ import annotations
-
 import torch
 from pathlib import Path
+from transformers import BertModel
+
+
+
+def download_and_save_base_model(model_name: str, save_path: str | Path) -> None:
+    """Downloads the base BERT model and saves it locally.
+
+    Args:
+        model_name: The name of the BERT model to download.
+        save_path: Directory to save the model.
+    """
+    path = Path(save_path)
+    path.mkdir(parents=True, exist_ok=True)
+    
+    if not (path / "config.json").exists():
+        print(f"Downloading base model {model_name} to {path}...")
+        model = BertModel.from_pretrained(model_name)
+        model.save_pretrained(path)
+    else:
+        print(f"Base model already exists at {path}.")
+
 
 def save_checkpoint(
-    model: BertSentimentClassifier,
+    model,
     save_path: str | Path,
     epoch: int,
     optimizer: torch.optim.Optimizer | None = None
@@ -30,10 +49,10 @@ def save_checkpoint(
     torch.save(checkpoint, path / f"checkpoint_epoch_{epoch}.pt")
 
 def load_checkpoint(
-    model: BertSentimentClassifier,
+    model,
     checkpoint_path: str | Path,
     device: torch.device
-) -> BertSentimentClassifier:
+):
     """Loads a model weight from a checkpoint.
 
     Args:

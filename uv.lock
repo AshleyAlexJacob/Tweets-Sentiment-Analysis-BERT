@@ -2678,6 +2678,8 @@ source = { editable = "." }
 dependencies = [
     { name = "fastapi" },
     { name = "ipykernel" },
+    { name = "pandas", version = "2.3.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "pandas", version = "3.0.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "ruff" },
     { name = "streamlit" },
     { name = "torch" },
@@ -2690,6 +2692,7 @@ dependencies = [
 requires-dist = [
     { name = "fastapi", specifier = ">=0.135.3" },
     { name = "ipykernel", specifier = ">=7.2.0" },
+    { name = "pandas", specifier = ">=2.3.3" },
     { name = "ruff", specifier = ">=0.15.10" },
     { name = "streamlit", specifier = ">=1.56.0" },
     { name = "torch", specifier = ">=2.11.0" },
