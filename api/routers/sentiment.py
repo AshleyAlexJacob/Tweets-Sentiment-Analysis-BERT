@@ -49,9 +49,19 @@ def predict_sentiment(
     pred_id = int(torch.argmax(probs).item())
     confidence = float(probs[pred_id].item())
     sentiment = _LABEL_NAMES[pred_id] if pred_id < len(_LABEL_NAMES) else str(pred_id)
+    p = probs.detach().cpu().tolist()
+    if len(p) < len(_LABEL_NAMES):
+        msg = f"Expected at least {len(_LABEL_NAMES)} logits, got {len(p)}"
+        raise ValueError(msg)
+    probabilities = {
+        "negative": float(p[0]),
+        "neutral": float(p[1]),
+        "positive": float(p[2]),
+    }
     return SentimentResponse(
         text=request.text,
         sentiment=sentiment,
         confidence=confidence,
         class_id=pred_id,
+        probabilities=probabilities,
     )

@@ -21,3 +21,7 @@ class SentimentResponse(BaseModel):
     sentiment: str = Field(..., description="The predicted sentiment class")
     confidence: float = Field(..., description="Confidence score for the prediction")
     class_id: int = Field(..., description="Numerical class ID")
+    probabilities: dict[str, float] = Field(
+        ...,
+        description="Softmax probability for negative, neutral, and positive",
+    )
