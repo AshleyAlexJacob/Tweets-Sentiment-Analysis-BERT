@@ -57,11 +57,10 @@ class TweetDataset(Dataset):
             raise ValueError(msg) from exc
 
         try:
-            encoding = self.tokenizer.encode_plus(
+            encoding = self.tokenizer(
                 text,
                 add_special_tokens=True,
                 max_length=self.max_length,
-                return_token_type_ids=False,
                 padding="max_length",
                 truncation=True,
                 return_attention_mask=True,

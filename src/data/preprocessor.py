@@ -162,11 +162,10 @@ class TweetPreprocessor:
             RuntimeError: If tokenization fails.
         """
         try:
-            return self.tokenizer.encode_plus(
+            return self.tokenizer(
                 text,
                 add_special_tokens=True,
                 max_length=self.max_length,
-                return_token_type_ids=False,
                 padding="max_length",
                 truncation=True,
                 return_attention_mask=True,

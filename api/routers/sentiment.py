@@ -38,16 +38,7 @@ def predict_sentiment(
         The prediction results.
     """
     text = preprocessor.clean_text(request.text)
-    encoding = preprocessor.tokenizer.encode_plus(
-        text,
-        add_special_tokens=True,
-        max_length=preprocessor.max_length,
-        return_token_type_ids=False,
-        padding="max_length",
-        truncation=True,
-        return_attention_mask=True,
-        return_tensors="pt",
-    )
+    encoding = preprocessor.tokenize_text(text)
     device = next(model.parameters()).device
     input_ids = encoding["input_ids"].to(device)
     attention_mask = encoding["attention_mask"].to(device)
