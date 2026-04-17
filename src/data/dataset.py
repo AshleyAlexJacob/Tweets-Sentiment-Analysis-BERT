@@ -49,7 +49,12 @@ class TweetDataset(Dataset):
             RuntimeError: If tokenization fails.
         """
         text = str(self.texts[idx])
-        target = self.targets[idx]
+        raw_target = self.targets[idx]
+        try:
+            target = int(raw_target)
+        except (TypeError, ValueError) as exc:
+            msg = f"Invalid label at index {idx}: {raw_target!r}"
+            raise ValueError(msg) from exc
 
         try:
             encoding = self.tokenizer.encode_plus(
@@ -76,5 +81,3 @@ class TweetDataset(Dataset):
             "attention_mask": encoding["attention_mask"].flatten(),
             "labels": torch.tensor(target, dtype=torch.long),
         }
-
-

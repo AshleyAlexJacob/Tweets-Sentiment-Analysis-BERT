@@ -27,6 +27,13 @@ cd app && npm install
 - **Prod** (larger model, e.g. Kaggle): `APP_ENV=prod python -m src.pipelines.data_preprocessing`
 - **Explicit config file**: `CONFIG_PATH=prod.config.yaml python -m src.pipelines.data_preprocessing`
 
+Preprocessing cleans text, maps Sentiment140 labels (0/2/4) to 3 classes, and writes `train_<stem>.csv`, `val_<stem>.csv`, and `test_<stem>.csv` under `data.processed_path` (split fractions: `train_fraction`, `val_fraction`, `test_fraction`).
+
+### Model training and evaluation
+
+- Train: `python -m src.pipelines.model_training` (same `APP_ENV` / `CONFIG_PATH` rules as preprocessing).
+- Evaluate on the test split: `python -m src.pipelines.model_evaluation` (loads `best_model.pt` from `model.checkpoint_path`, or `model.eval_checkpoint` if set).
+
 Config resolution (see `src.utils.load_config`): optional `CONFIG_PATH`, then `APP_ENV` (`prod` → `prod.config.yaml`, else `dev.config.yaml`), else fallback `config.yaml`.
 
 ### Linting and formatting
@@ -65,6 +72,9 @@ Config resolution (see `src.utils.load_config`): optional `CONFIG_PATH`, then `A
 - `src/data/preprocessor.py`: tokenizer setup and dataframe cleaning (`TweetPreprocessor`).
 - `src/data/loader.py`: CSV loading and `DataLoader` construction (`TweetLoader`).
 - `src/data/dataset.py`: PyTorch `Dataset` for tokenized batches (`TweetDataset`).
-- `src/pipelines/data_preprocessing.py`: end-to-end raw CSV → cleaned CSV pipeline.
+- `src/data/splits.py`: deterministic train/val/test split helpers.
+- `src/pipelines/data_preprocessing.py`: end-to-end raw CSV → cleaned + split CSVs.
+- `src/pipelines/model_training.py` / `src/pipelines/model_evaluation.py`: training and test evaluation orchestration.
+- `src/model/architecture.py`, `src/model/train.py`, `src/model/evaluate.py`: classifier, trainer, and metrics.
 
 These modules use `try` / `except` for I/O, parsing and other failures: errors are logged (where a logger is used), re-raised with context, or in the CLI pipeline reported so a single bad file does not stop the whole run.

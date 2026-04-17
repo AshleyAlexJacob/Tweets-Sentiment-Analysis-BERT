@@ -11,6 +11,48 @@ from src.data.cleaner import TweetCleaner
 
 logger = logging.getLogger(__name__)
 
+# Sentiment140 raw labels -> 3-class ids (negative, neutral, positive).
+SENTIMENT140_TO_THREE_CLASS: dict[int, int] = {0: 0, 2: 1, 4: 2}
+
+
+def remap_sentiment140_targets(
+    df: pd.DataFrame,
+    target_col: str = "target",
+) -> pd.DataFrame:
+    """Maps Sentiment140-style targets to 0/1/2 and drops unknown labels.
+
+    Mapping: ``0 -> 0`` (negative), ``2 -> 1`` (neutral), ``4 -> 2`` (positive).
+
+    Args:
+        df: DataFrame with a numeric target column.
+        target_col: Name of the label column.
+
+    Returns:
+        DataFrame with remapped integer labels; rows with unmapped targets
+        are removed.
+
+    Raises:
+        KeyError: If ``target_col`` is missing.
+    """
+    if target_col not in df.columns:
+        raise KeyError(
+            f"DataFrame has no column {target_col!r}; columns: {list(df.columns)}"
+        )
+    out = df.copy()
+    numeric = pd.to_numeric(out[target_col], errors="coerce")
+    mapped = numeric.map(SENTIMENT140_TO_THREE_CLASS)
+    before = len(out)
+    valid = mapped.notna()
+    out = out.loc[valid].copy()
+    out[target_col] = mapped.loc[valid].astype(int)
+    dropped = before - len(out)
+    if dropped:
+        logger.info(
+            "Dropped %s rows with targets outside {0, 2, 4} or non-numeric",
+            dropped,
+        )
+    return out.reset_index(drop=True)
+
 
 class TweetPreprocessor:
     """Preprocess tweets: cleaning and BERT tokenization."""

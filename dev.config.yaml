@@ -5,10 +5,18 @@ project:
 data:
   raw_path: "dataset/raw"
   processed_path: "dataset/processed"
-  test_size: 0.2
+  # Train / validation / test fractions (must sum to 1.0).
+  train_fraction: 0.7
+  val_fraction: 0.1
+  test_fraction: 0.2
   random_state: 42
   max_length: 128
   batch_size: 16
+  # Optional: override split CSV basenames (relative to processed_path).
+  # If unset, training discovers train_<stem>.csv from processed_path.
+  # train_csv: "train_tweets.csv"
+  # val_csv: "val_tweets.csv"
+  # test_csv: "test_tweets.csv"
 
 model:
   # Tiny BERT for faster local development and smoke tests.
@@ -16,7 +24,10 @@ model:
   num_labels: 3
   learning_rate: 2e-5
   epochs: 2
+  # Directory for epoch checkpoints; best weights saved as best_model.pt here.
   checkpoint_path: "artifacts/checkpoints-dev"
+  # Optional explicit checkpoint for evaluation (defaults to checkpoint_path/best_model.pt).
+  # eval_checkpoint: "artifacts/checkpoints-dev/best_model.pt"
 
 api:
   host: "0.0.0.0"

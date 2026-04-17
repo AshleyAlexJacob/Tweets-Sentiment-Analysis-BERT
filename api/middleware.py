@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import logging
+
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 logger = logging.getLogger(__name__)
+
 
 def setup_error_handlers(app: FastAPI) -> None:
     """Registers global exception handlers for the application.
@@ -12,11 +14,10 @@ def setup_error_handlers(app: FastAPI) -> None:
     Args:
         app (FastAPI): The FastAPI instance.
     """
-    
+
     @app.exception_handler(Exception)
     async def global_exception_handler(
-        request: Request,
-        exc: Exception
+        request: Request, exc: Exception
     ) -> JSONResponse:
         """Handles all unhandled exceptions.
 

@@ -2,9 +2,11 @@ from __future__ import annotations
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from api.routers import sentiment
+
 from api.middleware import setup_error_handlers
+from api.routers import sentiment
 from src.utils import load_config
+
 
 def create_app() -> FastAPI:
     """Application factory for the FastAPI system.
@@ -13,7 +15,7 @@ def create_app() -> FastAPI:
         FastAPI: The initialized FastAPI application.
     """
     config = load_config()
-    
+
     app = FastAPI(
         title=config["project"]["name"],
         version=config["project"]["version"],
@@ -34,9 +36,7 @@ def create_app() -> FastAPI:
 
     # Register routers
     app.include_router(
-        sentiment.router,
-        prefix=f"/{config['api']['version']}",
-        tags=["sentiment"]
+        sentiment.router, prefix=f"/{config['api']['version']}", tags=["sentiment"]
     )
 
     @app.get("/")
@@ -44,5 +44,6 @@ def create_app() -> FastAPI:
         return {"message": "Welcome to the Tweet Sentiment Analysis API"}
 
     return app
+
 
 app = create_app()

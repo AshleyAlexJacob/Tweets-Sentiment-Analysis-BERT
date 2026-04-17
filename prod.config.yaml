@@ -5,7 +5,9 @@ project:
 data:
   raw_path: "dataset/raw"
   processed_path: "dataset/processed"
-  test_size: 0.2
+  train_fraction: 0.7
+  val_fraction: 0.1
+  test_fraction: 0.2
   random_state: 42
   max_length: 128
   batch_size: 32

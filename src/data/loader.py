@@ -4,12 +4,14 @@ import logging
 from pathlib import Path
 
 import pandas as pd
+import torch
 from torch.utils.data import DataLoader
 from transformers.tokenization_utils_base import PreTrainedTokenizerBase
 
 from src.data.dataset import TweetDataset
 
 logger = logging.getLogger(__name__)
+
 
 class TweetLoader:
     """Utility class for loading tweet data from CSV files."""
@@ -98,6 +100,8 @@ class TweetLoader:
         batch_size: int = 32,
         max_length: int = 128,
         shuffle: bool = True,
+        num_workers: int = 0,
+        pin_memory: bool | None = None,
     ) -> DataLoader:
         """Creates a PyTorch DataLoader from a DataFrame.
 
@@ -107,6 +111,10 @@ class TweetLoader:
             batch_size: Number of samples per batch.
             max_length: Maximum sequence length.
             shuffle: Whether to shuffle the data.
+            num_workers: ``DataLoader`` worker processes.
+            pin_memory: If ``True``, enables pinned memory when CUDA is available.
+                If ``None``, pins memory only when CUDA is available and shuffle
+                is typical for training (caller can set explicitly).
 
         Returns:
             A PyTorch DataLoader.
@@ -123,6 +131,8 @@ class TweetLoader:
                 f"{self.target_col!r}; got: {list(df.columns)}"
             ) from exc
 
+        use_pin = pin_memory if pin_memory is not None else torch.cuda.is_available()
+
         try:
             dataset = TweetDataset(
                 texts=texts,
@@ -130,7 +140,48 @@ class TweetLoader:
                 tokenizer=tokenizer,
                 max_length=max_length,
             )
-            return DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)
+            return DataLoader(
+                dataset,
+                batch_size=batch_size,
+                shuffle=shuffle,
+                num_workers=num_workers,
+                pin_memory=use_pin,
+            )
         except Exception as exc:
             logger.exception("Failed to create DataLoader")
             raise RuntimeError("Failed to create DataLoader from DataFrame") from exc
+
+    def create_dataloader_from_csv(
+        self,
+        csv_path: str | Path,
+        tokenizer: PreTrainedTokenizerBase,
+        batch_size: int = 32,
+        max_length: int = 128,
+        shuffle: bool = True,
+        num_workers: int = 0,
+        pin_memory: bool | None = None,
+    ) -> DataLoader:
+        """Loads a processed split CSV and builds a ``DataLoader``.
+
+        Args:
+            csv_path: Path to CSV with ``target`` and ``tweet_text`` columns.
+            tokenizer: Hugging Face tokenizer.
+            batch_size: Batch size.
+            max_length: Max token length.
+            shuffle: Whether to shuffle samples.
+            num_workers: ``DataLoader`` workers.
+            pin_memory: Optional pin-memory override (see ``create_dataloader``).
+
+        Returns:
+            Configured ``DataLoader``.
+        """
+        df = self.load_csv(csv_path)
+        return self.create_dataloader(
+            df,
+            tokenizer,
+            batch_size=batch_size,
+            max_length=max_length,
+            shuffle=shuffle,
+            num_workers=num_workers,
+            pin_memory=pin_memory,
+        )
